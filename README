@@ -1,0 +1,6 @@
+This little program can draw the Sierpinski Triangle, either in your console or
+as a PNG image.
+
+Written for Python 3.
+
+Requirements are listed in requirements.txt.
