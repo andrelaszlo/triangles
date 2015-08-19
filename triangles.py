@@ -56,7 +56,7 @@ class ConsoleTriangle(BaseTriangle):
         super().__init__(size)
         w, h = size
         self._canvas = [[" " for _ in range(w)] for _ in range(h)]
-        self.fill(self.boundary(), char='#')
+        self.fill(self.boundary(), char='▲')
 
     def fill(self, triangle, char=' '):
         # Draw a triangle by filling line segments from top to bottom
@@ -65,18 +65,17 @@ class ConsoleTriangle(BaseTriangle):
         (ax, ay), (bx, by), (cx, cy) = triangle
 
         segment_length = max(bx - ax, cx - bx)
-        height = int(round(cy - ay))
+        height = cy - ay
         x_offset = min(ax, bx, cx)
         dx = segment_length / height
         y_offset = min(ay, by, cy)
-        row_range = range(height)
+        row_range = range(int(round(y_offset)), int(round(y_offset + height)))
         if ax > bx:
             # Reversed rectangle
-            row_range = range(height, 0, -1)
-        for row in row_range:
+            row_range = range(int(round(y_offset + height)), int(round(y_offset)), -1)
+        for y in row_range:
             start = int(round(x_offset))
             end = int(round(x_offset + segment_length))
-            y = int(round(row + y_offset))
             for x in range(start, end+1):
                 try:
                     self._canvas[y][x] = char
