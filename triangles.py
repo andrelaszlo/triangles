@@ -19,7 +19,8 @@ class BaseTriangle:
         w, h = self.size
         return (w/2, 0), (0, h), (w, h)
 
-    def _midpoints(self, points):
+    @staticmethod
+    def _midpoints(points):
         """ Left, right and bottom corner of the inscribed triangle. """
         (ax, ay), (bx, by), (cx, cy) = points
         ab = bx + ((ax - bx) / 2), ay + ((by - ay) / 2)
@@ -28,7 +29,7 @@ class BaseTriangle:
         return ab, ac, bc
 
     def _subtriangles(self, triangle):
-        """ Divides the triangle described by points into three subtriangles. """
+        """Divides the triangle described by points into three subtriangles."""
         a, b, c = triangle
         ab, ac, bc = self._midpoints(triangle)
         return (a, ab, ac), (ab, b, bc), (ac, bc, c)
@@ -73,7 +74,8 @@ class ConsoleTriangle(BaseTriangle):
         row_range = range(int(floor(y_offset)), int(ceil(y_offset + height)))
         if ax > bx:
             # Reversed rectangle
-            row_range = range(int(ceil(y_offset + height)), int(floor(y_offset))-2, -1)
+            row_range = range(int(ceil(y_offset + height)),
+                              int(floor(y_offset)), -1)
         for y in row_range:
             start = int(floor(x_offset))
             end = int(ceil(x_offset + segment_length))
@@ -130,10 +132,9 @@ if __name__ == '__main__':
         iterations = int(sys.argv[2])
 
     if triangle_type == 'image':
-        triangle = ImageTriangle((800, 600), 'triangles.png', scaling=3, background='purple')
-        triangle.render(iterations)
+        ImageTriangle((800, 600), 'triangles.png',
+                      scaling=3, background='purple').render(iterations)
     else:
         import console
         term_size = console.get_terminal_size()
-        triangle = ConsoleTriangle(term_size)
-        triangle.render(iterations)
+        ConsoleTriangle(term_size).render(iterations)
