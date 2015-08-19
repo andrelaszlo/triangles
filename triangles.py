@@ -95,22 +95,18 @@ def subtriangles(points, midpoints):
     return (a, ab, ac), (ab, b, bc), (ac, bc, c)
 
 
-def generate(maxdepth, triangle, boundary=None, depth=0):
-    if depth == maxdepth:
-        return
-
+def generate(maxdepth, triangle):
     w, h = triangle.size
 
-    if boundary is None:
-        boundary = triangle.boundary()
-
-    triangle.fill(midpoints(boundary))
-
-    for subtriangle in subtriangles(boundary, midpoints(boundary)):
-        generate(maxdepth, triangle, subtriangle, depth+1)
+    regions = [(0, triangle.boundary())]
+    for level, region in regions:
+        triangle.fill(midpoints(region))
+        if level < maxdepth:
+            for subtriangle in subtriangles(region, midpoints(region)):
+                regions.append((level+1, subtriangle))
 
 
 if __name__ == '__main__':
     triangle = ImageTriangle((800, 600), 'triangles.png', scaling=3, background='purple')
-    generate(7, triangle)
+    generate(6, triangle)
     triangle.finish()
