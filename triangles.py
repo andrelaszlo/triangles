@@ -6,9 +6,11 @@ class BaseTriangle:
         self.size = size
 
     def fill(self, triangle):
+        """ Mark a triangular area of the Triangle as 'filled'. """
         raise NotImplementedError()
 
     def finish(self):
+        """ Called when rendering is completed. """
         pass
 
     def boundary(self):
@@ -20,33 +22,35 @@ class BaseTriangle:
 class ConsoleTriangle(BaseTriangle):
     def __init__(self, size):
         super().__init__(size)
-        self._canvas = [["." for _ in range(self.size[0])]
-                        for _ in range(self.size[1])]
+        w, h = size
+        self._canvas = [["." for _ in range(w)] for _ in range(h)]
 
     def fill(self, triangle):
         # Draw a triangle by filling line segments from top to bottom
 
         # left, right, bottom (pointing down)
-        (ax, ay), (bx, by), (cx, cy) = midpoints
+        (ax, ay), (bx, by), (cx, cy) = triangle
     
         segment_length = bx - ax
         height = int(round(cy - ay))
-        offset = 0
+        offset = ax
         dx = segment_length / height
         #print(midpoints)
+        print('height', height)
         for row in range(height):
             start = int(round(offset))
             end = int(round(offset+segment_length))
-            y_ = int(round(row+ay))
+            y = int(round(row+ay))
+            print("y", y)
             for x in range(start, end+1):
                 #print(row, x_)
                 try:
-                    tri[x][y_] = "#"
+                    self._canvas[y][x] = "#"
+                    print("put", x, y)
                     #tri[x_][row] = 1
                 except IndexError:
                     pass # whatever
-            print(offset, segment_length)
-            offset += dx
+            offset += dx/2
             segment_length -= dx
 
     def finish(self):
@@ -89,24 +93,36 @@ def midpoints(points):
     return ab, ac, bc
 
 
-def subtriangles(points, midpoints):
-    a, b, c = points
-    ab, ac, bc = midpoints
+def subtriangles(triangle):
+    """ Divides the triangle described by points into three subtriangles. """
+    a, b, c = triangle
+    ab, ac, bc = midpoints(triangle)
     return (a, ab, ac), (ab, b, bc), (ac, bc, c)
 
 
-def generate(maxdepth, triangle):
+def render(maxdepth, triangle):
+    """ Renders the Sierpinski triangle """
     w, h = triangle.size
 
     regions = [(0, triangle.boundary())]
     for level, region in regions:
         triangle.fill(midpoints(region))
         if level < maxdepth:
-            for subtriangle in subtriangles(region, midpoints(region)):
+            for subtriangle in subtriangles(region):
                 regions.append((level+1, subtriangle))
 
 
 if __name__ == '__main__':
-    triangle = ImageTriangle((800, 600), 'triangles.png', scaling=3, background='purple')
-    generate(6, triangle)
-    triangle.finish()
+    import sys
+    triangle_type = 'image'
+    if len(sys.argv) > 1 and sys.argv[1].startswith('c'):
+        triangle_type = 'console'
+
+    if triangle_type == 'image':
+        triangle = ImageTriangle((800, 600), 'triangles.png', scaling=3, background='purple')
+        render(1, triangle)
+        triangle.finish()
+    else:
+        triangle = ConsoleTriangle((80, 40))
+        render(2, triangle)
+        triangle.finish()
