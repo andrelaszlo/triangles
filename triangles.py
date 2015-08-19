@@ -23,34 +23,34 @@ class ConsoleTriangle(BaseTriangle):
     def __init__(self, size):
         super().__init__(size)
         w, h = size
-        self._canvas = [["." for _ in range(w)] for _ in range(h)]
+        self._canvas = [[" " for _ in range(w)] for _ in range(h)]
+        self.fill(self.boundary(), char='#')
 
-    def fill(self, triangle):
+    def fill(self, triangle, char=' '):
         # Draw a triangle by filling line segments from top to bottom
 
         # left, right, bottom (pointing down)
         (ax, ay), (bx, by), (cx, cy) = triangle
     
-        segment_length = bx - ax
+        segment_length = max(bx - ax, cx - bx)
         height = int(round(cy - ay))
-        offset = ax
+        x_offset = min(ax, bx, cx)
         dx = segment_length / height
-        #print(midpoints)
-        print('height', height)
-        for row in range(height):
-            start = int(round(offset))
-            end = int(round(offset+segment_length))
-            y = int(round(row+ay))
-            print("y", y)
+        y_offset = min(ay, by, cy)
+        row_range = range(height)
+        if ax > bx:
+            # Reversed rectangle
+            row_range = range(height, 0, -1)
+        for row in row_range:
+            start = int(round(x_offset))
+            end = int(round(x_offset + segment_length))
+            y = int(round(row + y_offset))
             for x in range(start, end+1):
-                #print(row, x_)
                 try:
-                    self._canvas[y][x] = "#"
-                    print("put", x, y)
-                    #tri[x_][row] = 1
+                    self._canvas[y][x] = char
                 except IndexError:
-                    pass # whatever
-            offset += dx/2
+                    pass  # Don't care - out of bounds
+            x_offset += dx/2
             segment_length -= dx
 
     def finish(self):
@@ -104,7 +104,10 @@ def render(maxdepth, triangle):
     """ Renders the Sierpinski triangle """
     w, h = triangle.size
 
-    regions = [(0, triangle.boundary())]
+    if maxdepth == 0:
+        return
+
+    regions = [(1, triangle.boundary())]
     for level, region in regions:
         triangle.fill(midpoints(region))
         if level < maxdepth:
@@ -114,15 +117,22 @@ def render(maxdepth, triangle):
 
 if __name__ == '__main__':
     import sys
+
     triangle_type = 'image'
+    iterations = 2
+
     if len(sys.argv) > 1 and sys.argv[1].startswith('c'):
         triangle_type = 'console'
 
+    if len(sys.argv) > 2:
+        iterations = int(sys.argv[2])
+        print("iterations set to", iterations)
+
     if triangle_type == 'image':
         triangle = ImageTriangle((800, 600), 'triangles.png', scaling=3, background='purple')
-        render(1, triangle)
+        render(iterations, triangle)
         triangle.finish()
     else:
-        triangle = ConsoleTriangle((80, 40))
-        render(2, triangle)
+        triangle = ConsoleTriangle((150, 48))
+        render(iterations, triangle)
         triangle.finish()
