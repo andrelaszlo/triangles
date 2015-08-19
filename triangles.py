@@ -18,6 +18,38 @@ class BaseTriangle:
         w, h = self.size
         return (w/2, 0), (0, h), (w, h)
 
+    def _midpoints(self, points):
+        """ Left, right and bottom corner of the inscribed triangle. """
+        (ax, ay), (bx, by), (cx, cy) = points
+        ab = bx + ((ax - bx) / 2), ay + ((by - ay) / 2)
+        ac = ax + ((cx - ax) / 2), ay + ((cy - ay) / 2)
+        bc = bx + ((cx - bx) / 2), by
+        return ab, ac, bc
+
+    def _subtriangles(self, triangle):
+        """ Divides the triangle described by points into three subtriangles. """
+        a, b, c = triangle
+        ab, ac, bc = self._midpoints(triangle)
+        return (a, ab, ac), (ab, b, bc), (ac, bc, c)
+
+    def render(self, maxdepth):
+        """ Renders the Sierpinski triangle """
+        self._render(maxdepth)
+        self.finish()
+
+    def _render(self, maxdepth):
+        w, h = self.size
+
+        if maxdepth == 0:
+            return
+
+        regions = [(1, self.boundary())]
+        for level, region in regions:
+            self.fill(self._midpoints(region))
+            if level < maxdepth:
+                for subtriangle in self._subtriangles(region):
+                    regions.append((level+1, subtriangle))
+
 
 class ConsoleTriangle(BaseTriangle):
     def __init__(self, size):
@@ -31,7 +63,7 @@ class ConsoleTriangle(BaseTriangle):
 
         # left, right, bottom (pointing down)
         (ax, ay), (bx, by), (cx, cy) = triangle
-    
+
         segment_length = max(bx - ax, cx - bx)
         height = int(round(cy - ay))
         x_offset = min(ax, bx, cx)
@@ -55,6 +87,7 @@ class ConsoleTriangle(BaseTriangle):
 
     def finish(self):
         print("\n".join("".join(row) for row in self._canvas), end="")
+        input()
 
 
 class ImageTriangle(BaseTriangle):
@@ -84,37 +117,6 @@ class ImageTriangle(BaseTriangle):
         self._im.save(self._filename)
 
 
-def midpoints(points):
-    """ Left, right and bottom corner of the inscribed triangle. """
-    (ax, ay), (bx, by), (cx, cy) = points
-    ab = bx + ((ax - bx) / 2), ay + ((by - ay) / 2)
-    ac = ax + ((cx - ax) / 2), ay + ((cy - ay) / 2)
-    bc = bx + ((cx - bx) / 2), by
-    return ab, ac, bc
-
-
-def subtriangles(triangle):
-    """ Divides the triangle described by points into three subtriangles. """
-    a, b, c = triangle
-    ab, ac, bc = midpoints(triangle)
-    return (a, ab, ac), (ab, b, bc), (ac, bc, c)
-
-
-def render(maxdepth, triangle):
-    """ Renders the Sierpinski triangle """
-    w, h = triangle.size
-
-    if maxdepth == 0:
-        return
-
-    regions = [(1, triangle.boundary())]
-    for level, region in regions:
-        triangle.fill(midpoints(region))
-        if level < maxdepth:
-            for subtriangle in subtriangles(region):
-                regions.append((level+1, subtriangle))
-
-
 if __name__ == '__main__':
     import sys
 
@@ -130,12 +132,9 @@ if __name__ == '__main__':
 
     if triangle_type == 'image':
         triangle = ImageTriangle((800, 600), 'triangles.png', scaling=3, background='purple')
-        render(iterations, triangle)
-        triangle.finish()
+        triangle.render(iterations)
     else:
         import console
         term_size = console.get_terminal_size()
         triangle = ConsoleTriangle(term_size)
-        render(iterations, triangle)
-        triangle.finish()
-        input("\r")
+        triangle.render(iterations)
