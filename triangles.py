@@ -127,7 +127,6 @@ if __name__ == '__main__':
 
     if len(sys.argv) > 2:
         iterations = int(sys.argv[2])
-        print("iterations set to", iterations)
 
     if triangle_type == 'image':
         triangle = ImageTriangle((800, 600), 'triangles.png', scaling=3, background='purple')
