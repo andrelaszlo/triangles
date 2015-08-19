@@ -54,7 +54,7 @@ class ConsoleTriangle(BaseTriangle):
             segment_length -= dx
 
     def finish(self):
-        print("\n".join("".join(row) for row in self._canvas))
+        print("\n".join("".join(row) for row in self._canvas), end="")
 
 
 class ImageTriangle(BaseTriangle):
@@ -133,6 +133,9 @@ if __name__ == '__main__':
         render(iterations, triangle)
         triangle.finish()
     else:
-        triangle = ConsoleTriangle((150, 48))
+        import console
+        term_size = console.get_terminal_size()
+        triangle = ConsoleTriangle(term_size)
         render(iterations, triangle)
         triangle.finish()
+        input("\r")
