@@ -1,4 +1,5 @@
 from PIL import Image, ImageDraw
+from math import floor, ceil
 
 
 class BaseTriangle:
@@ -69,14 +70,14 @@ class ConsoleTriangle(BaseTriangle):
         x_offset = min(ax, bx, cx)
         dx = segment_length / height
         y_offset = min(ay, by, cy)
-        row_range = range(int(round(y_offset)), int(round(y_offset + height)))
+        row_range = range(int(floor(y_offset)), int(ceil(y_offset + height)))
         if ax > bx:
             # Reversed rectangle
-            row_range = range(int(round(y_offset + height)), int(round(y_offset)), -1)
+            row_range = range(int(ceil(y_offset + height)), int(floor(y_offset))-2, -1)
         for y in row_range:
-            start = int(round(x_offset))
-            end = int(round(x_offset + segment_length))
-            for x in range(start, end+1):
+            start = int(floor(x_offset))
+            end = int(ceil(x_offset + segment_length))
+            for x in range(start, end):
                 try:
                     self._canvas[y][x] = char
                 except IndexError:

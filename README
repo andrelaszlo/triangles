@@ -9,7 +9,7 @@ Usage:
 
 python triangles.py [console|image] [iterations]
 
-Example:
+Examples:
 
 $ python triangles.py console 3
 
